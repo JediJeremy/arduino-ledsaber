@@ -1,12 +1,14 @@
 
 int blade_preset = 0;
-// presets                 aqua green yell whit blue prpl orng red  
-int preset_hue[] =        { 144,  96,  64,  144, 160, 192,  32,   0 };
-int preset_saturation[] = { 255, 255, 255,  32,  255, 255, 255, 255 };
-int preset_buzz[] =       {  47,  48,  47,  50,  47,  50,   49,  45 };
-int preset_hum1[] =       {  50,  50,  55,  60,  50,  50,   50,  47 };
-int preset_hum2[] =       {  52,  51,  54,  62,  52,  57,   49,  48 };
-int preset_doppler[] =    {  30,  30,  35,  40,  40,  45,  -10,  30 };
+// presets                   aqua green yell whit blue prpl orng red  
+int   preset_hue[] =        { 144,  96,  64,  144, 160, 192,  32,   0 };
+int   preset_saturation[] = { 255, 255, 255,  32,  255, 255, 255, 255 };
+int   preset_buzz[] =       {  47,  48,  47,  50,  47,  50,   49,  45 };
+int   preset_hum1[] =       {  50,  50,  55,  60,  50,  50,   50,  47 };
+int   preset_hum2[] =       {  52,  51,  54,  60,  52,  57,   50,  47 };
+int   preset_doppler[] =    {  30,  30,  35,  40,  40,  45,  -10,  30 };
+int   preset_echo[] =       { 180, 200, 210, 220, 180, 192,  240, 210 };
+int   preset_speed[] =      {   3,   2,   2,   3,   2,   3,   2,    1 };
 
 // blade modes
 #define BLADE_MODE_OFF        0
@@ -17,7 +19,7 @@ int preset_doppler[] =    {  30,  30,  35,  40,  40,  45,  -10,  30 };
 
 // Total LED power limit, of all RGB LEDS together.
 // If your strips are back-to-back in a tube without serious extra heatsinking, don't exceed 40% sustained power
-#define BLADE_POWER_LIMIT     0.35f
+#define BLADE_POWER_LIMIT     0.30f
 // Seriously. I mean it. I heat-destroyed a blade at 100% so you don't have to. 
 // It will run for a few minutes and then neopixels will start dying.
 // we can also define limits for the individual channels, since that last 10% of brightness usually makes more heat than light (especially for red)
@@ -44,13 +46,14 @@ int snd_buzz_freq = 47;
 int snd_hum1_freq = 50; 
 int snd_hum2_freq = 52; 
 int snd_hum2_doppler = 40;
+int snd_echo_decay = 128;
 unsigned int entropy = 0;
 void add_entropy(byte e, byte mask) {
   entropy = entropy << 1 ^ (e & mask);
 }
 
 // how many modes
-#define MODE_COUNT 11
+#define MODE_COUNT 12
 
 // mode light colour list
 CRGB mode_color[] = {
@@ -64,7 +67,8 @@ CRGB mode_color[] = {
   CRGB::Orange, // mode 7 : hum1 frequency
   CRGB::Orange, // mode 8 : hum2 frequency
   CRGB::Red,    // mode 9 : doppler shift
-  CRGB::Black,  // mode 10 : no action
+  CRGB::Red,    // mode 10 : echo decay
+  CRGB::Black,  // mode 11 : no action
 };
 
 // add a delta to a value, and limit the result to a range
@@ -104,6 +108,7 @@ void eeprom_restore() {
     snd_hum1_freq = EEPROM.read(5); 
     snd_hum2_freq = EEPROM.read(6); 
     snd_hum2_doppler = EEPROM.read(7) - 128;
+    snd_echo_decay = EEPROM.read(12); 
     // blade color
     blade_hue = EEPROM.read(8); 
     blade_saturation = EEPROM.read(9);
@@ -121,6 +126,7 @@ void eeprom_save() {
   EEPROM.update(5,snd_hum1_freq);
   EEPROM.update(6,snd_hum2_freq);
   EEPROM.update(7,snd_hum2_doppler);
+  EEPROM.update(12,snd_echo_decay);
   // blade color
   EEPROM.update(8,blade_hue);
   EEPROM.update(9,blade_saturation);

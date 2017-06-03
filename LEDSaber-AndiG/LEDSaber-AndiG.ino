@@ -68,6 +68,8 @@ float rotation_history = 0.0;
 float rotation_offset = 0.0;
 float rotation_factor = 0.0;
 
+float rotation_echo = 0.0;
+
 float velocity_offset = 26.6;
 float velocity_factor = 0;
 
@@ -202,14 +204,26 @@ void loop() {
       snd_buzz_volume = 0;
       snd_hum1_volume = 0;
       snd_hum2_volume = 0;
+      rotation_echo = 0;
       // ignite if the rotation has exceeded the critical value
-      if(rotation_history > 120.0) ignite();
+      if(rotation_history > 100.0) ignite();
       break;
     case BLADE_MODE_ON: 
       // rotation hum and pitch-bend
       rv = rotation_history;
       if(rv<0.0) rv = 0.0;
-      if(rv>140.0) rv = 140.0;
+      if(rv>140.0) rv = 120.0;
+      // update the rotation echo
+      if(rv > rotation_echo) {
+        // the echo is maximised
+        rotation_echo = rv;
+      } else {
+        // decay the previous echo
+        rotation_echo = rotation_echo * ( 0.975f + (float)snd_echo_decay / 10240.0f);
+        // use the louder of the original value and 1/1.6 the echo
+        rv = max(rv, rotation_echo/1.6);
+      }
+      // rotation volume term
       rv = rv / 256.0 * global_volume;
       delta = 0;
       if(rv>snd_hum2_volume) { delta = 16; } 

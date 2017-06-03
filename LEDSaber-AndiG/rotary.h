@@ -95,11 +95,13 @@ void rotary_delta(int d) {
           // load preset values
           blade_hue = preset_hue[blade_preset];
           blade_saturation = preset_saturation[blade_preset];
+          extend_speed = preset_speed[blade_preset];
           update_blade(); 
           snd_buzz_freq = preset_buzz[blade_preset];
           snd_hum1_freq = preset_hum1[blade_preset];
           snd_hum2_freq = preset_hum2[blade_preset];
           snd_hum2_doppler = preset_doppler[blade_preset];
+          snd_echo_decay = preset_echo[blade_preset];
           break;
         // blade properties
         case 3: blade_brightness = value_delta(blade_brightness, d*8, 7, 255); update_blade();  break;      
@@ -110,6 +112,7 @@ void rotary_delta(int d) {
         case 7: snd_hum1_freq += d; break;
         case 8: snd_hum2_freq += d; break;
         case 9: snd_hum2_doppler += d; break;
+        case 10: snd_echo_decay = value_delta(snd_echo_decay, d, 0, 255); break;
         
       }
       break;
@@ -118,7 +121,7 @@ void rotary_delta(int d) {
        button_state = 2;
     case 2: // selecting option
       // modify mode
-      button_mode = value_delta(button_mode, d, 0, 9);
+      button_mode = value_delta(button_mode, d, 0, MODE_COUNT-1);
       update_blade(); 
       break;
   }
@@ -154,6 +157,7 @@ void check_button() {
         if(--button_longpress == 0) {
           // long press event
           button_held();
+          button_state = 4; // so we don't single-click afterwards
         }
       }
   }
