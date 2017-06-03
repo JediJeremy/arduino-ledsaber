@@ -36,6 +36,16 @@ byte debounce_change(byte input, byte * state, byte * bounce, byte debounce) {
   }
 }
 
+
+void button_click() {
+  // if we are properly off, then ignite
+  switch(blade_mode) {
+    case BLADE_MODE_OFF: 
+      ignite();
+      break;
+  }
+}
+
 void button_held() {
   // toggle the blade
   switch(blade_mode) {
@@ -130,6 +140,11 @@ void check_button() {
       button_longpress = LONGPRESS_DELAY;
       break;
     case 2:
+      // did we ever select a menu option?
+      if(button_state==1) {
+        // no, so this was a short click.
+        button_click();
+      }
       button_state = 0;
       update_blade();
       button_longpress = 0;

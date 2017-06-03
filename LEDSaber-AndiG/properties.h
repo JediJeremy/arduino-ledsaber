@@ -153,7 +153,14 @@ void update_blade() {
   if(button_state==2) {
     // show the mode dots
     for(int m=0; m<MODE_COUNT; m++) {
-      blade_leds[i++] = blade_leds[i++] = (m==button_mode) ? mode_color[m] : CRGB::Black;
+      if(m==button_mode) {
+        // current menu dot. both leds full brightness
+        blade_leds[i++] = blade_leds[i++] = mode_color[m];
+      } else {
+        // not current item. low-intensity first dot
+        blade_leds[i++] = CRGB( mode_color[m].r>>4, mode_color[m].g>>4, mode_color[m].b>>4);
+        blade_leds[i++] =  CRGB::Black;
+      }
       blade_leds[i++] =  CRGB::Black;
     }
   }
